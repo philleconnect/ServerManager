@@ -310,8 +310,8 @@ def listEnv():
 def storeEnv():
     data = request.form
     if data.get("apikey") == getApiKey():
-        for entry in json.loads(data.get("data")):
-            env.storeValue(entry["id"], entry["value"], entry["description"], entry["mutable"])
+        for key, entry in json.loads(data.get("data")).items():
+            env.storeValue(key, entry["value"], entry["description"], entry["mutable"])
         return json.dumps({"result":"SUCCESS"})
     else:
         return json.dumps({"error":"ERR_AUTH"})
