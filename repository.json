@@ -1,0 +1,74 @@
+{
+    "lastupdate":"",
+    "modules":{
+        "core":{
+            "type":"essential",
+            "subscription":false,
+            "versions":[
+                {
+                    "version":"0.0.1",
+                    "required":"0.0.1",
+                    "url":"https://jkm-marburg.de/pcsm/core/service.json",
+                    "revert":true
+                }
+            ],
+            "description":"Kernprogramme von SchoolConnect."
+        },
+        "servermanager":{
+            "type":"manager",
+            "versions":[
+                {
+                    "version":"0.0.0",
+                    "required":"0.0.0",
+                    "url":"",
+                    "revert":true
+                },
+                {
+                    "version":"0.0.1",
+                    "required":"0.0.0",
+                    "url":"https://jkm-marburg.de/pcsm/servermanager_0.0.1.tar.gz",
+                    "revert":true
+                }
+            ]
+        },
+        "nextcloud":{
+            "type":"plugin",
+            "subscription":false,
+            "versions":[
+                {
+                    "version":"0.0.0",
+                    "required":"0.0.0",
+                    "url":"",
+                    "revert":true
+                }
+            ],
+            "description":"Nextcloud fuer Dateizugriff von Ueberall mittels Webbrowser, inkl. Online-Office."
+        },
+        "radius":{
+            "type":"plugin",
+            "subscription":false,
+            "versions":[
+                {
+                    "version":"0.0.0",
+                    "required":"0.0.0",
+                    "url":"",
+                    "revert":true
+                }
+            ],
+            "description":"RADIUS Authentifizierungsserver fuer WPA-Enterprise WiFi Access Points."
+        },
+        "phpldapadmin":{
+            "type":"plugin",
+            "subscription":false,
+            "versions":[
+                {
+                    "version":"1.0.0",
+                    "required":"1.0.0",
+                    "url":"",
+                    "revert":true
+                }
+            ],
+            "description":"PhpLdapAdmin fuer Direktzugriff auf die LDAP-Datenbank Ã¼ber eine Weboberfläeche. ACHTUNG: NUR FUER DEBUGGING UND ERFAHRENE ADMINS!."
+        }
+    }
+}
