@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager - container volume data copy script
-# © 2019 Johannes Kreutz.
+# © 2019 - 2020 Johannes Kreutz.
 
 # Include dependencies
 import shutil
@@ -15,7 +15,7 @@ import modules.filesystem as fs
 # Main logic
 if len(sys.argv) == 3:
     if sys.argv[2] == "delete":
-        if not sys.argv[1].includes("/var/lib/docker/volumes/"):
+        if not "/var/lib/docker/volumes/" in sys.argv[1]:
             fs.filesystem.removeElement(sys.argv[1])
     else:
         if not os.path.exists(sys.argv[1]) and not os.path.isdir(sys.argv[1]):
