@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager - service class
-# © 2019 Johannes Kreutz.
+# © 2019 - 2020 Johannes Kreutz.
 
 # Possible service wantings
 # running: Service is up and running
@@ -330,9 +330,10 @@ class service:
         self.stop()
         # Backup all volume contents
         for volume in self.__volumes:
-            backupPath = env.getValue("USERDATA") + "/PreviousVersions/" + volume.getName() + "_" + self.__config["actualVersion"]
+            backupPath = env.getValue("USERDATA") + "/PreviousVersions/" + volume.getName() + "_" + self.__config["previousVersion"]
             if os.path.exists(backupPath):
-                fs.filesystem.removeElement(backupPath)
+                remover = Popen(["sudo", "/usr/local/bin/servermanager/volumebackup.py", backupPath, "delete"])
+                remover.wait()
             os.makedirs(backupPath)
             volume.backupContent(backupPath)
         # Rename the existing containers and move them to previous
@@ -387,7 +388,7 @@ class service:
         self.__desc = description.serviceDescription(False, self.__name, self.__config["previousVersion"])
         # Restore volumes
         for volume in self.__volumes:
-            backupPath = env.getValue("USERDATA") + "/PreviousVersions/" + volume.getName() + "_" + self.__config["actualVersion"]
+            backupPath = env.getValue("USERDATA") + "/PreviousVersions/" + volume.getName() + "_" + self.__config["previousVersion"]
             volume.restoreContent(backupPath)
             delete = Popen(["sudo", "/usr/local/bin/servermanager/volumebackup.py", backupPath, "delete"])
             delete.wait()
@@ -396,7 +397,7 @@ class service:
         self.__config["status"] = "running"
         self.__saveConfiguration()
         # Delete files
-        fs.filesystem.removeElement(config.servicepath + self.__name + "/" + self.__name + "_" + self.__config["actualVersion"])
+        fs.filesystem.removeElement(config.servicepath + self.__name + "/service_" + self.__config["actualVersion"] + ".json")
         # Revert version number
         self.__config["actualVersion"] = self.__config["previousVersion"]
         self.__config["previousVersion"] = ""
