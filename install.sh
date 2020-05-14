@@ -12,7 +12,7 @@ fi
 # Check if the servermanager is already installed
 if [ -d "servermanager" ]; then
   if [ -f "servermanager/.SchoolConnectSetupDone" ]; then
-    whiptail --title "ALREADY INSTALLED" --msgbox "It seems like the SchoolConnect Server-Manager is already installed. Please delete 'servermanager/.SchoolConnectSetupDone' if you are shure it is not installed yet." 10 70
+    whiptail --title "ALREADY INSTALLED" --msgbox "It seems like the SchoolConnect Server-Manager is already installed. Please delete 'servermanager/.SchoolConnectSetupDone' if you are shure it is not installed yet." 10 80
     exit
   fi
 fi
@@ -24,92 +24,103 @@ if ! command -v whiptail > /dev/null; then
 fi
 
 # Begin graphical install
-whiptail --title "WELCOME TO THE SCHOOLCONNECT SERVER-MANAGER INSTALLER!" --msgbox "This script will install the SchoolConnect Server-Manager on your machine. Press Return to begin!" 10 70
+whiptail --title "WELCOME TO THE SCHOOLCONNECT SERVER-MANAGER INSTALLER!" --msgbox "This script will install the SchoolConnect Server-Manager on your machine. Press Return to begin!" 10 80
 
 # Ask and store required settings
 until ! [ -z "$SLAPD_PASSWORD" ]; do
-  SLAPD_PASSWORD=$(whiptail --title "SLAPD ROOT PASSWORD" --inputbox "First, please enter a root password for the slapd-service (OpenLDAP). WARNING! Anyone with this password can read and change all user data. Keep this password safe, you will need it if something fails!" 10 70 "" 3>&1 1>&2 2>&3)
+  SLAPD_PASSWORD=$(whiptail --title "SLAPD ROOT PASSWORD" --inputbox "First, please enter a root password for the slapd-service (OpenLDAP). WARNING! Anyone with this password can read and change all user data. Keep this password safe, you will need it if something fails!" 10 80 "" 3>&1 1>&2 2>&3)
   exitstatus=$?
   if ! [ $exitstatus = 0 ]; then
     echo "User canceled setup. Nothing has been installed yet, so it's safe to start again."
     exit
   fi
   if [ -z "$SLAPD_PASSWORD" ]; then
-    whiptail --title "INPUT VERIFICATION ERROR" --msgbox "Empty passwords are not allowed. Please enter a password." 10 70
+    whiptail --title "INPUT VERIFICATION ERROR" --msgbox "Empty passwords are not allowed. Please enter a password." 10 80
   fi
 done
 until ! [ -z "$MYSQL_PASSWORD" ]; do
-  MYSQL_PASSWORD=$(whiptail --title "MYSQL ROOT PASSWORD" --inputbox "Now, please enter a root password for the mysqld-service (MySQL Database). WARNING! Anyone with this password can read and change all configuration data, as well as the credentials of the emergency admin account. Keep this password safe, you will need it if something fails!" 10 70 "" 3>&1 1>&2 2>&3)
+  MYSQL_PASSWORD=$(whiptail --title "MYSQL ROOT PASSWORD" --inputbox "Now, please enter a root password for the mysqld-service (MySQL Database). WARNING! Anyone with this password can read and change all configuration data, as well as the credentials of the emergency admin account. Keep this password safe, you will need it if something fails!" 10 80 "" 3>&1 1>&2 2>&3)
   exitstatus=$?
   if ! [ $exitstatus = 0 ]; then
     echo "User canceled setup. Nothing has been installed yet, so it's safe to start again."
     exit
   fi
   if [ -z "$MYSQL_PASSWORD" ]; then
-    whiptail --title "INPUT VERIFICATION ERROR" --msgbox "Empty passwords are not allowed. Please enter a password." 10 70
+    whiptail --title "INPUT VERIFICATION ERROR" --msgbox "Empty passwords are not allowed. Please enter a password." 10 80
   fi
 done
 until ! [ -z "$SLAPD_ORGANIZATION" ]; do
-  SLAPD_ORGANIZATION=$(whiptail --title "SLAPD ORGANIZATION" --inputbox "Slapd needs the name of your organization. We recommend you using the name of your school." 10 70 "" 3>&1 1>&2 2>&3)
+  SLAPD_ORGANIZATION=$(whiptail --title "SLAPD ORGANIZATION" --inputbox "Slapd needs the name of your organization. We recommend you using the name of your school." 10 80 "" 3>&1 1>&2 2>&3)
   exitstatus=$?
   if ! [ $exitstatus = 0 ]; then
     echo "User canceled setup. Nothing has been installed yet, so it's safe to start again."
     exit
   fi
   if [ -z "$SLAPD_ORGANIZATION" ]; then
-    whiptail --title "INPUT VERIFICATION ERROR" --msgbox "This value is required." 10 70
+    whiptail --title "INPUT VERIFICATION ERROR" --msgbox "This value is required." 10 80
   fi
 done
+PREV_USERDATA=""
 until ! [ -z "$USERDATA" ]; do
-  USERDATA=$(whiptail --title "USER DATA STORAGE" --inputbox "Where do you want to store user data? Please type an absolute path, for example to the mount point of your data disks. We highly recommend to create regular backups of this location!" 10 70 "$USERDATA" 3>&1 1>&2 2>&3)
+  USERDATA=$(whiptail --title "USER DATA STORAGE" --inputbox "Where do you want to store user data? Please type an absolute path, for example to the mount point of your data disks. We highly recommend to create regular backups of this location!" 10 80 "$PREV_USERDATA" 3>&1 1>&2 2>&3)
   exitstatus=$?
   if ! [ $exitstatus = 0 ]; then
     echo "User canceled setup. Nothing has been installed yet, so it's safe to start again."
     exit
   fi
   if [ -z "$USERDATA" ]; then
-    whiptail --title "INPUT VERIFICATION ERROR" --msgbox "This value is required." 10 70
+    whiptail --title "INPUT VERIFICATION ERROR" --msgbox "This value is required." 10 80
   fi
   if [ ! -d "$USERDATA" ]; then
-    whiptail --title "DIRECTORY NOT FOUND" --msgbox "The directory you entered does not exist. Please enter a valid path." 10 70
-    unset USERDATA
+    if (whiptail --title "DIRECTORY NOT FOUND" --yesno "The directory you entered does not exist. Should we create it?." 10 80); then
+      if mkdir -p "$USERDATA" ; then
+        whiptail --title "DIRECTORY CREATION" --msgbox "User data directory successfully created." 10 80
+      else
+        whiptail --title "DIRECTORY CREATION FAILED" --msgbox "Unable to create the user data directory. Check permissions." 10 80
+        PREV_USERDATA=$USERDATA
+        unset USERDATA
+      fi
+    else
+      PREV_USERDATA=$USERDATA
+      unset USERDATA
+    fi
   fi
 done
 # Remove trailing slash if existing
 USERDATA=$(echo $USERDATA | sed 's:/*$::')
 
 # Explain optional settings
-whiptail --title "OPTIONAL SETTINGS" --msgbox "The following settings already have good default values. You can change them, but we don't recommend it unless you know what you are doing." 10 70
+whiptail --title "OPTIONAL SETTINGS" --msgbox "The following settings already have good default values. You can change them, but we don't recommend it unless you know what you are doing." 10 80
 
 # Ask and store optional settings
 until ! [ -z "$SLAPD_DOMAIN0" ]; do
-  SLAPD_DOMAIN0=$(whiptail --title "SLAPD TOPLEVEL DOMAIN" --inputbox "Slapd needs a top level domain. Everything will be stored under this key, but the user doesn't see it." 10 70 "local" 3>&1 1>&2 2>&3)
+  SLAPD_DOMAIN0=$(whiptail --title "SLAPD TOPLEVEL DOMAIN" --inputbox "Slapd needs a top level domain. Everything will be stored under this key, but the user doesn't see it." 10 80 "local" 3>&1 1>&2 2>&3)
   exitstatus=$?
   if ! [ $exitstatus = 0 ]; then
     echo "User canceled setup. Nothing has been installed yet, so it's safe to start again."
     exit
   fi
   if [ -z "$SLAPD_DOMAIN0" ]; then
-    if (whiptail --title "INPUT VERIFICATION ERROR" --yesno "Even if changing is optional, this value is required. Do you want to use the default? (No takes you back to the input screen.)" 10 70) then
+    if (whiptail --title "INPUT VERIFICATION ERROR" --yesno "Even if changing is optional, this value is required. Do you want to use the default? (No takes you back to the input screen.)" 10 80) then
       SLAPD_DOMAIN0="local"
     fi
   fi
 done
 until ! [ -z "$SLAPD_DOMAIN1" ]; do
-  SLAPD_DOMAIN1=$(whiptail --title "SLAPD SECOND LEVEL DOMAIN" --inputbox "Slapd also needs a second level domain. A lot will be stored under this key, but the user doesn't see it." 10 70 "schoolconnect" 3>&1 1>&2 2>&3)
+  SLAPD_DOMAIN1=$(whiptail --title "SLAPD SECOND LEVEL DOMAIN" --inputbox "Slapd also needs a second level domain. A lot will be stored under this key, but the user doesn't see it." 10 80 "schoolconnect" 3>&1 1>&2 2>&3)
   exitstatus=$?
   if ! [ $exitstatus = 0 ]; then
     echo "User canceled setup. Nothing has been installed yet, so it's safe to start again."
     exit
   fi
   if [ -z "$SLAPD_DOMAIN1" ]; then
-    if (whiptail --title "INPUT VERIFICATION ERROR" --yesno "Even if changing is optional, this value is required. Do you want to use the default? (No takes you back to the input screen.)" 10 70) then
+    if (whiptail --title "INPUT VERIFICATION ERROR" --yesno "Even if changing is optional, this value is required. Do you want to use the default? (No takes you back to the input screen.)" 10 80) then
       SLAPD_DOMAIN1="schoolconnect"
     fi
   fi
 done
 
-whiptail --title "FINISH INSTALLATION" --msgbox "All configuration values are set. Now I'll install the required dependencies, download the server manager files and install them. Relax for some minutes." 10 70
+whiptail --title "FINISH INSTALLATION" --msgbox "All configuration values are set. Now I'll install the required dependencies, download the server manager files and install them. Relax for some minutes." 10 80
 
 # Create a user for the server manager
 adduser --system --shell /bin/bash --gecos "User running the SchoolConnect Server-Manager" --group --disabled-password servermanager
@@ -234,4 +245,4 @@ systemctl start servermanager
 
 # Finalize
 touch /etc/servermanager/.ServerManagerSetupDone
-whiptail --title "INSTALLATION SUCCEDED" --msgbox "The SchoolConnect Server-Manager has been successfully installed on your server. We will now start it, so you can finish the setup in your web browser. Simply go to http://YOUR_IP:84" 10 70
+whiptail --title "INSTALLATION SUCCEDED" --msgbox "The SchoolConnect Server-Manager has been successfully installed on your server. We will now start it, so you can finish the setup in your web browser. Simply go to http://YOUR_IP:84" 10 80
