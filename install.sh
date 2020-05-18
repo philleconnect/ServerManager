@@ -153,7 +153,7 @@ fi
 rm /tmp/sudoers.sctmp
 
 # Install dependencies
-apt install -y python3 git docker docker.io python3-flask python3-docker
+apt install -y python3 git docker docker.io python3-pip
 
 # Allow servermanager to control docker
 usermod -a -G docker servermanager
@@ -170,6 +170,10 @@ mkdir /etc/servermanager
 mkdir /var/lib/servermanager
 mkdir /var/lib/servermanager/services
 mkdir /var/lib/servermanager/services/buildcache
+
+# Install python modules for servermanager user
+su servermanager -c "pip3 install docker"
+su servermanager -c "pip3 install flask"
 
 # Grant privileges for config and storage folders
 chown -R servermanager:servermanager /etc/servermanager
@@ -200,13 +204,13 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-# Create loopback IP so the pc_admin container can connect to the servermanager (Ubuntu only atm.)
-cat > /etc/netplan/40-servermanager-loopback.yaml <<EOF
+# Create loopback IP so the pc_admin container can connect to the servermanager
+cat << EOF >> /etc/netplan/40-servermanager-loopback.yaml
 network:
   version: 2
   renderer: networkd
   ethernets:
-   lo:
+    lo:
       match:
         name: lo
       addresses: [ 192.168.255.255/32 ]
