@@ -153,7 +153,7 @@ fi
 rm /tmp/sudoers.sctmp
 
 # Install dependencies
-apt install -y python3 git docker docker.io python3-pip
+apt install -y python3 git docker docker.io python3-pip python3-flask python3-docker
 
 # Allow servermanager to control docker
 usermod -a -G docker servermanager
@@ -172,8 +172,8 @@ mkdir /var/lib/servermanager/services
 mkdir /var/lib/servermanager/services/buildcache
 
 # Install python modules for servermanager user
-su servermanager -c "pip3 install docker"
-su servermanager -c "pip3 install flask"
+#su servermanager -c "pip3 install docker"
+#su servermanager -c "pip3 install flask"
 
 # Grant privileges for config and storage folders
 chown -R servermanager:servermanager /etc/servermanager
