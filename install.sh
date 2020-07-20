@@ -204,20 +204,6 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-# Create loopback IP so the pc_admin container can connect to the servermanager
-cat << EOF >> /etc/netplan/40-servermanager-loopback.yaml
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    lo:
-      match:
-        name: lo
-      addresses: [ 192.168.255.255/32 ]
-EOF
-netplan generate
-netplan apply
-
 # Write user settings to file
 ENVVARS="{\"SLAPD_PASSWORD\":{\"value\":\"$SLAPD_PASSWORD\",\"description\":\"Root-Passwort für den LDAP-Server.\",\"mutable\":false},\"MYSQL_ROOT_PASSWORD\":{\"value\":\"$MYSQL_PASSWORD\",\"description\":\"Root-Passwort für den MySQL-Server.\",\"mutable\":false},\"SLAPD_ORGANIZATION\":{\"value\":\"$SLAPD_ORGANIZATION\",\"description\":\"Organisations-Kennung in der LDAP-Struktur.\",\"mutable\":false},\"USERDATA\":{\"value\":\"$USERDATA\",\"description\":\"Pfad zum Speicherort für Benutzerdaten.\",\"mutable\":true},\"SLAPD_DOMAIN0\":{\"value\":\"$SLAPD_DOMAIN0\",\"description\":\"Top-Level-Domain für den LDAP-Server.\",\"mutable\":false},\"SLAPD_DOMAIN1\":{\"value\":\"$SLAPD_DOMAIN1\",\"description\":\"Second-Level-Domain für den LDAP-Server.\",\"mutable\":false}}"
 
@@ -242,6 +228,20 @@ mkdir -p $USERDATA/PreviousVersions
 # Start the server manager manually with firstsetup parameter (takes some time, will build containers here)
 echo "Building containers. This might take a while..."
 su servermanager -c "python3 /usr/local/bin/servermanager/servermanager.py firstsetup"
+
+# Create loopback IP so the pc_admin container can connect to the servermanager
+cat << EOF >> /etc/netplan/40-servermanager-loopback.yaml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    lo:
+      match:
+        name: lo
+      addresses: [ 192.168.255.255/32 ]
+EOF
+netplan generate
+netplan apply
 
 # Start the server manager via systemd
 systemctl enable servermanager
