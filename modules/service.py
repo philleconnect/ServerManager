@@ -337,10 +337,10 @@ class service:
             os.makedirs(backupPath)
             volume.backupContent(backupPath)
         # Rename the existing containers and move them to previous
+        self.__config["containers"]["previous"].clear()
         for ct in self.__config["containers"]["actual"]:
             self.__config["containers"]["previous"].append(ct)
         self.__config["containers"]["actual"].clear()
-        self.__containers["previous"].clear()
         for ct in self.__containers["actual"]:
             self.__containers["previous"].append(ct)
             ct.rename(ct.getName() + "_" + self.__config["previousVersion"])
