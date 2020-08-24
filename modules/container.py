@@ -89,8 +89,9 @@ class container:
 
     # Stops this container
     def stop(self):
-        self.__container.stop()
-        self.__status = 1
+        if hasattr(self, "__container"):
+            self.__container.stop()
+            self.__status = 1
 
     # Returns if this container is actually running
     def isRunning(self):
@@ -101,7 +102,11 @@ class container:
 
     # Deletes this container
     def delete(self):
-        self.__container.remove(v=False)
+        if hasattr(self, "__container"):
+            try:
+                self.__container.remove(v=False)
+            except docker.errors.NotFound:
+                pass
 
     # Returns the container status
     def getStatus(self):
