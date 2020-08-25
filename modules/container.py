@@ -34,8 +34,10 @@ class container:
                 self.__container = client.containers.get(container_id=id)
                 self.__status = 1
             except docker.errors.NotFound:
+                self.__container = None
                 self.__status = 5
             except docker.errors.APIError:
+                self.__container = None
                 self.__status = 6
                 print("Container lookup failed. Check inputs.")
 
@@ -71,40 +73,50 @@ class container:
 
     # Renames this container
     def rename(self, newName):
-        self.__container.rename(name=newName)
-        self.__container.reload()
+        if not self.__container == None:
+            self.__container.rename(name=newName)
+            self.__container.reload()
 
     # Returns this containers id
     def getId(self):
-        return self.__container.id
+        if not self.__container == None:
+            return self.__container.id
+        else:
+            return ""
 
     # Returns this containers actual name
     def getName(self):
-        return self.__container.name
+        if not self.__container == None:
+            return self.__container.name
+        else:
+            return ""
 
     # Starts this container
     def start(self):
-        self.__container.start()
-        self.__status = 2
+        if not self.__container == None:
+            self.__container.start()
+            self.__status = 2
 
     # Stops this container
     def stop(self):
-        self.__container.stop()
-        self.__status = 1
+        if not self.__container == None:
+            self.__container.stop()
+            self.__status = 1
 
     # Returns if this container is actually running
     def isRunning(self):
-        if self.__container.status == "running":
-            return True
+        if not self.__container == None:
+            if self.__container.status == "running":
+                return True
+            else:
+                return False
         else:
             return False
 
     # Deletes this container
     def delete(self):
-        try:
+        if not self.__container == None:
             self.__container.remove(v=False)
-        except docker.errors.NotFound:
-            pass
 
     # Returns the container status
     def getStatus(self):
