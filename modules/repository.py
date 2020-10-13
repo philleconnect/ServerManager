@@ -73,12 +73,11 @@ class repository:
         self.updateIfRequired()
         if self.getLatestAvailable(name) == actual:
             return actual
-        possbileVersions = []
+        latestCompatible = None
         for version in self.getModuleByName(name)["versions"]:
-            if self.compareVersions(version["required"], actual) >= 0:
-                possbileVersions.append(version["version"])
-        possbileVersions.sort(reverse = True)
-        return possbileVersions[0]
+            if self.compareVersions(version["required"], actual) >= 0 and latestCompatible == None or self.compareVersions(latestCompatible["version"], version["version"]) == 1:
+                latestCompatible = version
+        return latestCompatible["version"]
 
     # Returns if reverting to a previous version is possible with the actual installed version
     def isRevertPossible(self, name, actual):
@@ -95,9 +94,9 @@ class repository:
         l1 = v1.split(".")
         l2 = v2.split(".")
         for i in range(3):
-            if l1[i] > l2[i]:
+            if int(l1[i]) > int(l2[i]):
                 return -1
-            elif l1[i] < l2[i]:
+            elif int(l1[i]) < int(l2[i]):
                 return 1
         return 0
 
