@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager - service repository
-# © 2019 Johannes Kreutz.
+# © 2019 - 2020 Johannes Kreutz.
 
 # Include dependencies
 from pathlib import Path
 import json
 import requests
 import time
+
+# Include modules
+import config
 
 # Class definition
 class repository:
@@ -29,7 +32,10 @@ class repository:
     # Reload repository
     def update(self):
         self.__lastupdate = time.time()
-        self.__repo = json.loads(requests.get("https://philleconnect.org/assets/repository/repository.json").text)
+        repo = None
+        with open(config.configpath + "repo.txt", "r") as f:
+            repo = json.loads(f.read())
+        self.__repo = json.loads(requests.get(repo["url"]).text)
 
     # Returns the url of the service with the given name for the specified version, if available
     def getUrl(self, name, wantedVersion):

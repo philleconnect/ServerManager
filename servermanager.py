@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager
-# © 2019 Johannes Kreutz.
+# © 2019 - 2020 Johannes Kreutz.
 
 # Include dependencies
 import sys
@@ -9,8 +9,15 @@ import os
 import json
 from flask import Flask, request
 
-# Include modules
+# Include config
 import config
+
+# Update steps
+if not os.path.exists(config.configpath + "repo.txt"):
+    with open(config.configpath + "repo.txt", "w") as f:
+        f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository.json", "name":"production"}))
+
+# Include modules
 import modules.repository as repository
 import modules.service as service
 import modules.network as network
@@ -30,7 +37,7 @@ globalNetwork = None
 # First setup
 if len(sys.argv) > 1 and sys.argv[1] == "firstsetup":
     if os.path.exists(config.configpath + ".ServerManagerSetupDone"):
-        print("SchoolConnect Server-Manager seems to be installed already. If you think this is an error, delete the file '.SchoolConnectSetupDone' and run this again.")
+        print("SchoolConnect Server-Manager seems to be installed already. If you think this is an error, delete the file '.ServerManagerSetupDone' and run this again.")
         sys.exit()
     # Store fixed environment variables
     env.storeValue("MYSQL_DATABASE", "schoolconnect", "Name der Hauptdatenbank.", False)
@@ -60,7 +67,6 @@ if len(sys.argv) > 1 and sys.argv[1] == "firstsetup":
         newService.continueInstallation()
         services.append(newService)
     sys.exit()
-
 
 # Normal startup
 # Get main network reference
@@ -294,7 +300,28 @@ def licenseKey():
         return json.dumps({"result":license.getLicenseKey()})
     else:
         return json.dumps({"error":"ERR_AUTH"})
-
+# Get actual repository
+@api.route("/branch", methods=["POST"])
+def getBranch():
+    data = request.form
+    if data.get("apikey") == getApiKey():
+        with open(config.configpath + "repo.txt", "r") as f:
+            return json.dumps({"result":json.loads(f.read())})
+    else:
+        return json.dumps({"error":"ERR_AUTH"})
+# Switch branch
+@api.route("/setbranch", methods=["POST"])
+def setBranch():
+    data = request.form
+    if data.get("apikey") == getApiKey():
+        with open(config.configpath + "repo.txt", "r") as f:
+            if data.get("branch") == "production":
+                f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository.json", "name":"production"}))
+            elif data.get("branch") == "beta":
+                f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository-beta.json", "name":"beta"}))
+        return json.dumps({"result":"done"})
+    else:
+        return json.dumps({"error":"ERR_AUTH"})
 
 # ENVIRONMENT VARIABLES
 # Get a list of all existing environment variables
