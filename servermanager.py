@@ -314,7 +314,7 @@ def getBranch():
 def setBranch():
     data = request.form
     if data.get("apikey") == getApiKey():
-        with open(config.configpath + "repo.txt", "r") as f:
+        with open(config.configpath + "repo.txt", "w") as f:
             if data.get("branch") == "production":
                 f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository.json", "name":"production"}))
             elif data.get("branch") == "beta":
