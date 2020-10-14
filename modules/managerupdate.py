@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager - servermanager update
-# © 2019 Johannes Kreutz.
+# © 2019 - 2020 Johannes Kreutz.
 
 # Include dependencies
 import urllib.request
@@ -42,7 +42,7 @@ class managerupdate:
         if os.path.exists(config.backuppath + "backup"):
             managerupdate.emptyFolder(Path(config.backuppath + "backup"))
         # Create a new backup folder
-        os.makedirs(config.backuppath + "backup")
+        os.makedirs(config.backuppath + "backup", 0o777)
         # Copy actual servermanager executable files
         copyresult = Popen(["cp", "-R", config.managerpath + ".", config.backuppath + "backup"])
         copyresult.wait()
@@ -54,15 +54,15 @@ class managerupdate:
         if os.path.exists(config.backuppath + "update"):
             managerupdate.emptyFolder(Path(config.backuppath + "update"))
         # Download and extract
-        os.makedirs(config.backuppath + "update")
+        os.makedirs(config.backuppath + "update", 0o777)
         urllib.request.urlretrieve(url, config.backuppath + "servermanager_update.tar.gz")
         tar = Popen(["/bin/tar", "-zxf", config.backuppath + "servermanager_update.tar.gz", "--directory", config.backuppath])
         tar.wait()
         os.remove(config.backuppath + "servermanager_update.tar.gz")
-        copy = Popen(["cp", "-R", config.backuppath + "servermanager_" + version + "/.", config.backuppath + "update"])
+        copy = Popen(["cp", "-R", config.backuppath + "servermanager/.", config.backuppath + "update"])
         copy.wait()
-        managerupdate.emptyFolder(Path(config.backuppath + "servermanager_" + version))
-        
+        managerupdate.emptyFolder(Path(config.backuppath + "servermanager"))
+
     # Install a downloaded version
     @staticmethod
     def doUpdateInstallation():
