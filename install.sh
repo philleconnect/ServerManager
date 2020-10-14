@@ -159,7 +159,7 @@ apt install -y python3 git docker docker.io python3-pip python3-flask python3-do
 usermod -a -G docker servermanager
 
 # Download the server manager files and extract them
-wget -O servermanager_latest.tar.gz https://github.com/philleconnect/ServerManager/releases/download/0.9.0/servermanager_0.9.0.tar.gz
+wget -O servermanager_latest.tar.gz https://github.com/philleconnect/ServerManager/releases/download/0.9.1/servermanager.tar.gz
 tar -zxf servermanager_latest.tar.gz --directory /usr/local/bin/
 rm servermanager_latest.tar.gz
 
