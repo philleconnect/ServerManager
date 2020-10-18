@@ -149,6 +149,16 @@ def getAvailable():
     else:
         return json.dumps({"error":"ERR_AUTH"})
 
+# Check for Updates
+@api.route("/checkforupdates", methods=["POST"])
+def checkForUpdate():
+    data = request.form
+    if data.get("apikey") == getApiKey():
+        repo.update()
+        return json.dumps({"result":"DONE"})
+    else:
+        return json.dumps({"error":"ERR_AUTH"})
+
 # SERVICE CONTROL
 # Start or stop a service
 @api.route("/control", methods=["POST"])
