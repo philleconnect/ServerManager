@@ -151,7 +151,7 @@ def getAvailable():
 
 # Check for Updates
 @api.route("/checkforupdates", methods=["POST"])
-def checkForUpdate():
+def checkForRepoUpdate():
     data = request.form
     if data.get("apikey") == getApiKey():
         repo.update()
