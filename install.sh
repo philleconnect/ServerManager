@@ -20,7 +20,7 @@ fi
 # Check for minimal dependencies (graphical install)
 if ! command -v whiptail > /dev/null; then
   echo "Installing some dependencies first..."
-  apt install -y whiptail
+  apt install -y whiptail sudo
 fi
 
 # Begin graphical install
