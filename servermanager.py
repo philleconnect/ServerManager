@@ -15,7 +15,7 @@ import config
 # Update steps
 if not os.path.exists(config.configpath + "repo.txt"):
     with open(config.configpath + "repo.txt", "w") as f:
-        f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository.json", "name":"production"}))
+        f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository.json", "name":"production"}, sort_keys=True, indent=4))
 
 # Include modules
 import modules.repository as repository
@@ -52,7 +52,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "firstsetup":
     # Create main network
     globalNetwork = network.network(False, None, "schoolconnect", False)
     mainconfig = open(config.servicepath + "config.json", "w")
-    mainconfig.write(json.dumps({"globalNetwork":globalNetwork.getId()}))
+    mainconfig.write(json.dumps({"globalNetwork":globalNetwork.getId()}, sort_keys=True, indent=4))
     mainconfig.close()
     # Create api token for pc_admin
     apitokenfile = open(config.configpath + config.apitokenfile, "w")
@@ -326,9 +326,9 @@ def setBranch():
     if data.get("apikey") == getApiKey():
         with open(config.configpath + "repo.txt", "w") as f:
             if data.get("branch") == "production":
-                f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository.json", "name":"production"}))
+                f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository.json", "name":"production"}, sort_keys=True, indent=4))
             elif data.get("branch") == "beta":
-                f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository-beta.json", "name":"beta"}))
+                f.write(json.dumps({"url":"https://philleconnect.org/assets/repository/repository-beta.json", "name":"beta"}, sort_keys=True, indent=4))
         return json.dumps({"result":"done"})
     else:
         return json.dumps({"error":"ERR_AUTH"})
