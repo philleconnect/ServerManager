@@ -3,6 +3,8 @@
 # SchoolConnect Server-Installer
 # © 2019 Johannes Kreutz.
 
+version='1.0.1'
+
 # Check for root rights
 if [[ $EUID > 0 ]]; then
   echo "To install the SchoolConnect Server-Manager, you have to run this as root (sudo is fine)."
@@ -159,7 +161,7 @@ apt install -y python3 git docker docker.io python3-pip python3-flask python3-do
 usermod -a -G docker servermanager
 
 # Download the server manager files and extract them
-wget -O servermanager_latest.tar.gz https://github.com/philleconnect/ServerManager/releases/download/1.0.0/servermanager.tar.gz
+wget -O servermanager_latest.tar.gz 'https://github.com/philleconnect/ServerManager/releases/download/'$version'/servermanager.tar.gz'
 tar -zxf servermanager_latest.tar.gz --directory /usr/local/bin/
 rm servermanager_latest.tar.gz
 
