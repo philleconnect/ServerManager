@@ -444,5 +444,5 @@ class service:
     # Save service configuration to config.json
     def __saveConfiguration(self):
         configFile = open(config.servicepath + self.__name + "/config.json", "w")
-        configFile.write(json.dumps(self.__config))
+        configFile.write(json.dumps(self.__config, sort_keys=True, indent=4))
         configFile.close()
