@@ -3,7 +3,7 @@
 # SchoolConnect Server-Installer
 # © 2019 Johannes Kreutz.
 
-version='1.0.1'
+version='1.1.0'
 
 # Check for root rights
 if [[ $EUID > 0 ]]; then

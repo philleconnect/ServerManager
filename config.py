@@ -5,7 +5,7 @@
 
 # Config values
 # Version number
-servermanagerversion = "1.0.1"
+servermanagerversion = "1.1.0"
 
 # file paths
 servicepath = "/var/lib/servermanager/services/"
