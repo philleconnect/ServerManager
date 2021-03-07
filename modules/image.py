@@ -84,7 +84,7 @@ class image:
         if dircount != 1:
             return False
         try:
-            self.__image = client.images.build(path=config.servicepath + "buildcache/" + self.__name + "_" + randomString + "/" + dirname, rm=True)[0]
+            self.__image = client.images.build(path=config.servicepath + "buildcache/" + self.__name + "_" + randomString + "/" + dirname, rm=True, pull=True)[0]
             fs.filesystem.removeElement(config.servicepath + "buildcache/" + self.__name + "_" + randomString)
             self.__status = 1
             return self.__image.id
