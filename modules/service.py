@@ -60,6 +60,7 @@ class service:
         self.__updateThread = None
         self.__revertThread = None
         self.__deleteThread = None
+        self.__rebuildThread = None
         if not firstinstall:
             # Read container configuration
             configFile = open(config.servicepath + name + "/config.json", "r")
@@ -402,6 +403,32 @@ class service:
         # Revert version number
         self.__config["actualVersion"] = self.__config["previousVersion"]
         self.__config["previousVersion"] = ""
+        self.__saveConfiguration()
+
+    # SERVICE REBUILD
+    # Prepare rebuilding thread
+    def prepareRebuild(self):
+        self.__config["status"] = "installing"
+        self.__saveConfiguration()
+        self.__rebuildThread = threading.Thread(target=self.rebuild)
+        self.__rebuildThread.start()
+        return "running"
+
+    # Execute container rebuild
+    def rebuild(self):
+        # Stop the actual containers
+        self.stop()
+        # Remove the actual containers
+        for ct in self.__containers["actual"]:
+            ct.delete()
+        # Clear the arrays
+        self.__containers["actual"].clear()
+        self.__config["containers"]["actual"].clear()
+        # Build the new containers
+        self.continueInstallation()
+        # Start the new containers
+        self.start()
+        self.__config["status"] = "running"
         self.__saveConfiguration()
 
     # PRIVATE HELPER FUNCTIONS

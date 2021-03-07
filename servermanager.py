@@ -273,6 +273,20 @@ def checkForUpdate():
     else:
         return json.dumps({"error":"ERR_AUTH"})
 
+# SERVICE REBUILD
+# Start rebuilding a service
+@api.route("/rebuild", methods=["POST"])
+def rebuildService():
+    data = request.form
+    if data.get("apikey") == getApiKey():
+        service = getServiceByName(data.get("service"))
+        if service != False:
+            return json.dumps({"result":service.prepareRebuild()})
+        else:
+            return json.dumps({"error":"ERR_SERVICE_NOT_FOUND"})
+    else:
+        return json.dumps({"error":"ERR_AUTH"})
+
 # SERVERMANAGER CONTROL
 # Servermanager version and available updates
 @api.route("/manager", methods=["POST"])
