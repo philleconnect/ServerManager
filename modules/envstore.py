@@ -28,7 +28,7 @@ class envman:
     # Writes actual environment variables and their descriptions to the storage files
     def write(self):
         envfile = open(config.configpath + "env.json", "w")
-        envfile.write(json.dumps(self.__storage))
+        envfile.write(json.dumps(self.__storage, sort_keys=True, indent=4))
         envfile.close()
 
     # Returns the value of an environment variable with the given id if available
