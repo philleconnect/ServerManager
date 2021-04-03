@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager - service class
-# © 2019 - 2020 Johannes Kreutz.
+# © 2019 - 2021 Johannes Kreutz.
 
 # Possible service wantings
 # running: Service is up and running
@@ -35,16 +35,15 @@ import config
 import modules.container as container
 import modules.volume as volume
 import modules.network as network
-import modules.image as image
-import modules.envstore as envstore
 import modules.prune as prune
 import modules.servicedescription as description
 import modules.filesystem as fs
 import modules.builderThread as bt
 import modules.repository as repository
+from modules.envstore import envman
 
 # Manager objects
-env = envstore.envman()
+env = envman()
 
 # Class definition
 class service:
@@ -61,6 +60,7 @@ class service:
         self.__revertThread = None
         self.__deleteThread = None
         self.__rebuildThread = None
+        self.__localEnv = None
         if not firstinstall:
             # Read container configuration
             configFile = open(config.servicepath + name + "/config.json", "r")
@@ -68,6 +68,7 @@ class service:
             configFile.close()
             # Create service description object
             self.__desc = description.serviceDescription(False, self.__name, self.__config["actualVersion"])
+            self.__localEnv = envman(self.__name)
             # Create docker references for volumes
             for storedVolume in self.__config["volumes"]:
                 self.__volumes.append(volume.volume(True, storedVolume["id"], None))
@@ -76,9 +77,9 @@ class service:
                 self.networks.append(network.network(True, storedNetwork["id"], None, None))
             # Create docker references for containers
             for storedContainer in self.__config["containers"]["actual"]:
-                self.__containers["actual"].append(container.container(True, storedContainer["id"]))
+                self.__containers["actual"].append(container.container(True, storedContainer["id"], self.__name))
             for storedContainer in self.__config["containers"]["previous"]:
-                self.__containers["previous"].append(container.container(True, storedContainer["id"]))
+                self.__containers["previous"].append(container.container(True, storedContainer["id"], self.__name))
             # Check container status and turn containers to wanted status
             if self.__config["wanted"]:
                 for containerObject in self.__containers["actual"]:
@@ -116,6 +117,7 @@ class service:
         self.__saveConfiguration()
         # Download service description
         self.__desc = description.serviceDescription(True, self.__name, self.__config["actualVersion"], url)
+        self.__localEnv = envman(self.__name)
         # Check if all required environment variables are set
         requiredVars = self.__requiredEnvironmentVariables()
         self.__config["status"] = "installPending"
@@ -129,11 +131,18 @@ class service:
     def __requiredEnvironmentVariables(self):
         requiredVars = {}
         for var in self.__desc.getEnvironment():
-            if not env.doesKeyExist(var["name"]):
-                if "default" in var:
-                    env.storeValue(var["name"], var["default"], var["description"], var["mutable"])
-                else:
-                    requiredVars[var["name"]] = {"description":var["description"],"mutable":var["mutable"]}
+            if "private" in var and var["private"] == True:
+                if not self.__localEnv.doesKeyExist(var["name"]):
+                    if "default" in var:
+                        self.__localEnv.storeValue(var["name"], var["default"], var["description"], var["mutable"])
+                    else:
+                        requiredVars["[" + self.__name + "]" + var["name"]] = {"description":var["description"],"mutable":var["mutable"]}
+            else:
+                if not env.doesKeyExist(var["name"]):
+                    if "default" in var:
+                        env.storeValue(var["name"], var["default"], var["description"], var["mutable"])
+                    else:
+                        requiredVars[var["name"]] = {"description":var["description"],"mutable":var["mutable"]}
         if len(requiredVars) > 0:
             return requiredVars
         else:
@@ -161,7 +170,7 @@ class service:
         # Add containers to queue
         self.__queueLock.acquire()
         for name in containerList:
-            containerObject = {"object":self.__desc.getContainerObject(name),"image":self.__desc.getImageSource(name),"volumeSource":None}
+            containerObject = {"object":self.__desc.getContainerObject(name),"image":self.__desc.getImageSource(name),"volumeSource":None,"name":self.__name}
             self.__buildQueue.put(containerObject)
         self.__queueLock.release()
         # Create and start threads
@@ -384,7 +393,7 @@ class service:
         # Rename old containers back to original name
         for ct in self.__containers["actual"]:
             for name in names:
-                if name in ct.getName():
+                if name + "_" + self.__config["previousVersion"] == ct.getName():
                     ct.rename(name)
         # Read old service description
         self.__desc = description.serviceDescription(False, self.__name, self.__config["previousVersion"])

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager - image class
-# © 2019 Johannes Kreutz.
+# © 2019 - 2021 Johannes Kreutz.
 
 # Image status definitions
 # 0: Clean init
@@ -50,8 +50,10 @@ class image:
         self.__wantedVersion = wantedVersion
         if "prebuilt" in self.__wantedVersion:
             return self.__pull(self.__wantedVersion["prebuilt"]["name"] + ":" + self.__wantedVersion["prebuilt"]["version"])
-        else:
+        elif "url" in self.__wantedVersion:
             return self.__build(self.__wantedVersion["url"])
+        else:
+            return self.__build(self.__wantedVersion["path"], False)
 
     # Pulls an image from the docker hub
     def __pull(self, name):
@@ -64,28 +66,32 @@ class image:
             return False
 
     # Builds an image from a given url
-    def __build(self, url):
-        if not os.path.exists(config.servicepath + "buildcache"):
-            os.makedirs(config.servicepath + "buildcache")
-        randomString = ess.essentials.randomString(10)
-        fs.filesystem.removeElement(config.servicepath + "buildcache/" + self.__name + "_" + randomString)
-        fs.filesystem.removeElement(config.servicepath + "buildcache/" + self.__name + "_" + randomString + ".tar.gz")
-        os.makedirs(config.servicepath + "buildcache/" + self.__name + "_" + randomString)
-        urllib.request.urlretrieve(url, config.servicepath + "buildcache/" + self.__name + "_" + randomString + ".tar.gz")
-        tar = Popen(["/bin/tar", "-zxf", config.servicepath + "buildcache/" + self.__name + "_" + randomString + ".tar.gz", "--directory", config.servicepath + "buildcache/" + self.__name + "_" + randomString])
-        tar.wait()
-        fs.filesystem.removeElement(config.servicepath + "buildcache/" + self.__name + "_" + randomString + ".tar.gz")
-        dircount = 0
-        dirname = ""
-        for filename in os.listdir(config.servicepath + "buildcache/" + self.__name + "_" + randomString):
-            if os.path.isdir(config.servicepath + "buildcache/" + self.__name + "_" + randomString + "/" + filename):
-                dirname = filename
-                dircount += 1
-        if dircount != 1:
-            return False
-        try:
-            self.__image = client.images.build(path=config.servicepath + "buildcache/" + self.__name + "_" + randomString + "/" + dirname, rm=True, pull=True)[0]
+    def __build(self, url, download = True):
+        if download:
+            if not os.path.exists(config.servicepath + "buildcache"):
+                os.makedirs(config.servicepath + "buildcache")
+            randomString = ess.essentials.randomString(10)
             fs.filesystem.removeElement(config.servicepath + "buildcache/" + self.__name + "_" + randomString)
+            fs.filesystem.removeElement(config.servicepath + "buildcache/" + self.__name + "_" + randomString + ".tar.gz")
+            os.makedirs(config.servicepath + "buildcache/" + self.__name + "_" + randomString)
+            urllib.request.urlretrieve(url, config.servicepath + "buildcache/" + self.__name + "_" + randomString + ".tar.gz")
+            tar = Popen(["/bin/tar", "-zxf", config.servicepath + "buildcache/" + self.__name + "_" + randomString + ".tar.gz", "--directory", config.servicepath + "buildcache/" + self.__name + "_" + randomString])
+            tar.wait()
+            fs.filesystem.removeElement(config.servicepath + "buildcache/" + self.__name + "_" + randomString + ".tar.gz")
+            dircount = 0
+            sourcePath = ""
+            for filename in os.listdir(config.servicepath + "buildcache/" + self.__name + "_" + randomString):
+                if os.path.isdir(config.servicepath + "buildcache/" + self.__name + "_" + randomString + "/" + filename):
+                    sourcePath = config.servicepath + "buildcache/" + self.__name + "_" + randomString + "/" + filename
+                    dircount += 1
+            if dircount != 1:
+                return False
+        else:
+            sourcePath = url
+        try:
+            self.__image = client.images.build(path=sourcePath, rm=True, pull=True)[0]
+            if download:
+                fs.filesystem.removeElement(config.servicepath + "buildcache/" + self.__name + "_" + randomString)
             self.__status = 1
             return self.__image.id
         except docker.errors.BuildError:

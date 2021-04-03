@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager - image builder thread class
-# © 2019 Johannes Kreutz.
+# © 2019 - 2021 Johannes Kreutz.
 
 # Include dependencies
 import threading
@@ -36,6 +36,6 @@ class builderThread(threading.Thread):
 
     # Build a container with given image and description
     def __buildContainer(self, image, object):
-        containerObject = container.container(False, None)
+        containerObject = container.container(False, None, object["name"])
         containerObject.create(image, object["object"], object["volumeSource"])
         return containerObject

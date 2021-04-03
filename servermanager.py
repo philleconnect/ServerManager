@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager
-# © 2019 - 2020 Johannes Kreutz.
+# © 2019 - 2021 Johannes Kreutz.
 
 # Include dependencies
 import sys
@@ -21,13 +21,13 @@ if not os.path.exists(config.configpath + "repo.txt"):
 import modules.repository as repository
 import modules.service as service
 import modules.network as network
-import modules.envstore as envstore
 import modules.managerupdate as update
 import modules.essentials as ess
+from modules.envstore import envman
 
 # Manager objects
 repo = repository.repository()
-env = envstore.envman()
+env = envman()
 api = Flask(__name__)
 
 # Variables
@@ -353,7 +353,13 @@ def setBranch():
 def listEnv():
     data = request.form
     if data.get("apikey") == getApiKey():
-        return env.getJson()
+        main = json.loads(env.getJson())
+        for service in services:
+            localEnv = envman(service.getName())
+            data = json.loads(localEnv.getJson())
+            for id, content in data.items():
+                main["[" + service.getName() + "]" + id] = content
+        return json.dumps(main)
     else:
         return json.dumps({"error":"ERR_AUTH"})
 # Store a new environment variable
@@ -362,7 +368,13 @@ def storeEnv():
     data = request.form
     if data.get("apikey") == getApiKey():
         for key, entry in json.loads(data.get("data")).items():
-            env.storeValue(key, entry["value"], entry["description"], entry["mutable"])
+            if key.startswith("["):
+                parts = key.split("]")
+                serviceName = parts[0][1:]
+                localEnv = envman(serviceName)
+                localEnv.storeValue(parts[1], entry["value"], entry["description"], entry["mutable"])
+            else:
+                env.storeValue(key, entry["value"], entry["description"], entry["mutable"])
         return json.dumps({"result":"SUCCESS"})
     else:
         return json.dumps({"error":"ERR_AUTH"})

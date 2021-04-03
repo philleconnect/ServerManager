@@ -13,21 +13,28 @@ import config
 
 # Class definition
 class envman:
-    def __init__(self):
-        if not os.path.exists(config.configpath + "env.json"):
-            self.__storage = {}
+    def __init__(self, service = None):
+        if service is None:
+            self.__path = config.configpath + "env.json"
+        else:
+            self.__path = config.servicepath + service + "/env.json"
+        self.__storage = {}
+        if not os.path.exists(self.__path):
             self.write()
-        self.updateLocalIp()
+        else:
+            self.load()
+        if service is None:
+            self.updateLocalIp()
 
     # Read stored environment variables and their descriptions from configuration files
     def load(self):
-        envfile = open(config.configpath + "env.json", "r")
+        envfile = open(self.__path, "r")
         self.__storage = json.loads(envfile.read())
         envfile.close()
 
     # Writes actual environment variables and their descriptions to the storage files
     def write(self):
-        envfile = open(config.configpath + "env.json", "w")
+        envfile = open(self.__path, "w")
         envfile.write(json.dumps(self.__storage, sort_keys=True, indent=4))
         envfile.close()
 

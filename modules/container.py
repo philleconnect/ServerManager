@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager - container class
-# © 2019 Johannes Kreutz.
+# © 2019 - 2021 Johannes Kreutz.
 
 # Container status codes
 # 0: Clean init
@@ -17,18 +17,19 @@ import docker
 
 # Include modules
 import config
-import modules.envstore as envstore
+from modules.envstore import envman
 
 # Manager objects
-env = envstore.envman()
+env = envman()
 
 # Create docker connection
 client = docker.from_env()
 
 # Class definition
 class container:
-    def __init__(self, exists, id):
+    def __init__(self, exists, id, name):
         self.__status = 0
+        self.__localEnv = envman(name)
         if exists:
             try:
                 self.__container = client.containers.get(container_id=id)
@@ -145,7 +146,11 @@ class container:
         environmentMap = {}
         if "environment" in object:
             for var in object["environment"]:
-                environmentMap[var] = env.getValue(var)
+                local = self.__localEnv.getValue(var)
+                if local is False:
+                    environmentMap[var] = env.getValue(var)
+                else:
+                    environmentMap[var] = local
         if object["name"] == "pc_admin":
             apitokenfile = open(config.configpath + config.apitokenfile, "r")
             environmentMap["APIKEY"] = apitokenfile.read()
