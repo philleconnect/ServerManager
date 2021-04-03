@@ -393,7 +393,7 @@ class service:
         # Rename old containers back to original name
         for ct in self.__containers["actual"]:
             for name in names:
-                if name in ct.getName():
+                if name + "_" + self.__config["previousVersion"] == ct.getName():
                     ct.rename(name)
         # Read old service description
         self.__desc = description.serviceDescription(False, self.__name, self.__config["previousVersion"])
