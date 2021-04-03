@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # SchoolConnect Server-Manager
-# © 2019 - 2020 Johannes Kreutz.
+# © 2019 - 2021 Johannes Kreutz.
 
 # Include dependencies
 import sys

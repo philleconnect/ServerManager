@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # SchoolConnect Server-Installer
-# © 2019 Johannes Kreutz.
+# © 2019 - 2021 Johannes Kreutz.
 
-version='1.1.1'
+version='1.2.0'
 
 # Check for root rights
 if [[ $EUID > 0 ]]; then
