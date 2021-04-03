@@ -59,3 +59,16 @@ MUTABLE_WITH_DEFAULT=BAR
 # This value is shared with the global store. S
 SHARED=VALUE_NOT_USED
 ```
+
+## Publish a service
+Publishing a service involves the following steps:
+
+### Prerequisites:
+
+- The `docker-compose.yml` file and all `.env` files are in the root directory of your git repository.
+
+### Publishing:
+
+- Create a release on GitHub. You don't have to add any artifacts, the auto-generated ones are sufficient.
+- Copy the link to the `.tar.gz` file (NOT the `.zip`).
+- Add the link as url in the repository.json.
