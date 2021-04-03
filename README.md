@@ -38,7 +38,7 @@ A valid `.env` file contains the following lines:
 
 Each compose file gets a private environment storage. All new values will be stored there by default. So, multiple compose files can use the same keys. It is possible to define an environment variable as shared.
 
-For ServerManager, the comment line **directly before** a key-value pair is important. It allows to specify the explanation of the key, which is shown in the GUI. Also, it is possible to specify how the key should be handled. After the explanation, The following modes are available:
+For ServerManager, the comment line **directly before** a key-value pair is important. It allows to specify the explanation of the key, which is shown in the GUI. Also, it is possible to specify how the key should be handled. After the explanation, add the mode letters you want to use. The following modes are available:
 
 - `M`: mutable. If this is set, the value can be altered in the GUI.
 - `U`: use default value. If this is set, the default value provided will be chosen, no need to input a value at first installation.
