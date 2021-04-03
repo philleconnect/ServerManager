@@ -155,7 +155,7 @@ fi
 rm /tmp/sudoers.sctmp
 
 # Install dependencies
-apt install -y python3 git docker docker.io python3-pip python3-flask python3-docker
+apt install -y python3 git docker docker.io python3-pip python3-flask python3-docker python3-yaml
 
 # Allow servermanager to control docker
 usermod -a -G docker servermanager
