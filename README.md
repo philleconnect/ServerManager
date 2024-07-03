@@ -1,3 +1,5 @@
+__Archived: Not actively maintained anymore!__
+
 # ServerManager
 Base server application for v2
 
